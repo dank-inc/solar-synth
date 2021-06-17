@@ -1,0 +1,22 @@
+{
+  "name": "solar-synth",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "parcel src/index.html --public-url /public",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@parcel/transformer-raw": "^2.0.0-alpha.3",
+    "@types/node": "^15.12.2",
+    "@dank-inc/sketchy": "^0.19.0",
+    "@parcel/transformer-typescript-tsc": "^2.0.0-nightly.724",
+    "axios": "^0.21.1",
+    "parcel": "^2.0.0-beta.2",
+    "ts-node": "^10.0.0",
+    "typescript": "^4.3.3"
+  }
+}
