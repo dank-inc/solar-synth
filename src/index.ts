@@ -13,7 +13,7 @@ type Data = {
 }
 
 const main = async () => {
-  const { data } = await axios.get<Data>('https://txt.t0.vc/SLLD.json')
+  const { data } = await axios.get<Data>('https://txt.t0.vc/KCDX.json')
 
   const points = data.results[0].series[0].values
 
