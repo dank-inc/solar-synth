@@ -1,0 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=Hind+Madurai:wght@300;400;600;700&display=swap');
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  font-family: 'Hind Madurai', sans-serif;
+  font-weight: 600;
+
+}
+
+div,
+p {
+  font-family: 'Hind Madurai', sans-serif;
+  font-weight: 300;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.app {
+  width: 50vw;
+  text-align: center;
+  margin: auto;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
