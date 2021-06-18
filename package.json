@@ -11,7 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "@dank-inc/lewps": "^0.10.1",
-    "@dank-inc/sketchy": "^0.19.0",
+    "@dank-inc/sketchy": "^0.20.0",
     "@parcel/transformer-raw": "^2.0.0-alpha.3",
     "@parcel/transformer-typescript-tsc": "^2.0.0-nightly.724",
     "@types/node": "^15.12.2",

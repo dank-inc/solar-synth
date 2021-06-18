@@ -37,3 +37,13 @@ body {
   flex-direction: row;
   justify-content: space-between;
 }
+
+#sketchy {
+  height: 50vh;
+  width: 50vw;
+}
+
+#sketchy canvas {
+  height: 50vh;
+  width: 50vw;
+}

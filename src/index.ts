@@ -1,34 +1,78 @@
 import axios from 'axios'
+import Sketchy, { createParams, loadSketch } from '@dank-inc/sketchy'
+import vis from './vis'
+import { saturate } from '@dank-inc/sketchy/lib/helpers/filter'
+import { forI } from '@dank-inc/lewps'
 
 const buttonEl = document.querySelector('.trigger') as HTMLButtonElement
 console.log('solar synth!')
 console.log('button', buttonEl)
 
+export type Values = [time: number, total: number][]
+
 type Series = {
   name: string
   columns: [string, string]
-  values: [time: number, total: number][]
+  values: Values
 }
 
 type Data = {
   results: { series: Series[] }[]
 }
 
+const state: { index: number; data: Values; bufferLength: number } = {
+  index: 0,
+  data: [],
+  bufferLength: 256,
+}
+
 const main = async () => {
   const { data } = await axios.get<Data>('https://txt.t0.vc/KCDX.json')
 
+  const visEl = document.getElementById('sketchy')
+  const rangeEl = document.getElementById('range') as HTMLInputElement
+
   const points = data.results[0].series[0].values
+
+  state.data = points
+    .slice(0, state.bufferLength)
+    .map(([ts, val]) => [ts, val / 7500])
+
+  rangeEl.min = 0 + ''
+  rangeEl.max = points.length + ''
+  rangeEl.value = state.index + ''
+
+  rangeEl.onchange = (e) => {
+    // @ts-ignore
+    const index = e.target.value as number
+    state.index = index
+
+    const newData = []
+    for (let i = state.index; i < state.index + state.bufferLength; i++) {
+      newData.push(points[i % points.length])
+    }
+
+    forI(newData, (point, i) => {
+      state.data[i][1] = point[1] / 7500
+      return null
+    })
+  }
+
+  console.log('length', points.length)
+
+  // setInterval(() => {
+  //   points.forEach((point) => (point[1] = point[1] + r(300, -150)))
+  // }, 1000 / 24)
+
+  loadSketch(
+    vis,
+    createParams({ element: visEl, data: state.data, animate: true }),
+  )
 
   console.log('values:', points)
 
-  // split into days
-  // find good sample size
-  // create sketch
-  // create audio context
   const dataEl = document.querySelector('.data')
   let n = 0
-  // get min-max
-  // split time into days
 
   for (const [ts, val] of points) {
     const rowEl = document.createElement('div')
@@ -44,11 +88,11 @@ const main = async () => {
     rowEl.appendChild(tsEl)
     rowEl.appendChild(valEl)
 
-    dataEl.appendChild(rowEl)
+    // dataEl.appendChild(rowEl)
     n++
   }
 
-  buttonEl.addEventListener('mousedown', createSynth)
+  buttonEl.addEventListener('mousedown', () => createSynth(points))
 }
 
 const createCtx = (): AudioContext | null => {
@@ -60,30 +104,28 @@ const createCtx = (): AudioContext | null => {
   }
 }
 
-const createSynth = async () => {
-  console.log('playing')
+const createSynth = async (points: Values) => {
   const context = createCtx()
   if (!context) return
 
+  // const stream = new MediaStream()
+  // const track = new MediaStreamTrack()
+  // stream.addTrack(track)
+  // context.createMediaStreamSource(stream)
+
   //create nodes
-  const masterGain = context.createGain()
-  const analyser = context.createAnalyser()
-
-  const arrayBuffer = context.createBuffer(1, 256, 44000)
+  const arrayBuffer = context.createBuffer(1, state.data.length, 44000)
   const channel = arrayBuffer.getChannelData(0)
+  const gainNode = context.createGain()
+  gainNode.gain.value = 0.1
 
-  for (let i = 0; i < arrayBuffer.length; i++) {
-    const u = i / 44000
-    channel[i] = Math.sin(u * Math.PI * 2 * 220 * 4)
-  }
+  forI(state.data, ([_, val], i) => (channel[i] = val * 2 - 0.5))
 
   const source = context.createBufferSource()
   source.buffer = arrayBuffer
 
-  //routing
-  source.connect(context.destination)
-  masterGain.connect(analyser)
-  analyser.connect(context.destination)
+  // Why does this work?
+  source.connect(gainNode).connect(context.destination)
 
   source.start()
   source.loop = true
