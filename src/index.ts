@@ -1,12 +1,10 @@
 import axios from 'axios'
-import Sketchy, { createParams, loadSketch } from '@dank-inc/sketchy'
+import { createParams, loadSketch } from '@dank-inc/sketchy'
 import vis from './vis'
-import { saturate } from '@dank-inc/sketchy/lib/helpers/filter'
 import { forI } from '@dank-inc/lewps'
 
 const buttonEl = document.querySelector('.trigger') as HTMLButtonElement
-console.log('solar synth!')
-console.log('button', buttonEl)
+const stopEl = document.querySelector('.stahp') as HTMLButtonElement
 
 export type Values = [time: number, total: number][]
 
@@ -104,35 +102,38 @@ const createCtx = (): AudioContext | null => {
   }
 }
 
+let source: AudioBufferSourceNode
+
 const createSynth = async (points: Values) => {
   const context = createCtx()
   if (!context) return
 
-  // const stream = new MediaStream()
   // const track = new MediaStreamTrack()
-  // stream.addTrack(track)
+  // const stream = new MediaStream([track])
   // context.createMediaStreamSource(stream)
 
-  //create nodes
-  const arrayBuffer = context.createBuffer(1, state.data.length, 44000)
-  const channel = arrayBuffer.getChannelData(0)
-  const gainNode = context.createGain()
-  gainNode.gain.value = 0.1
+  const generateBuffer = (t = 0) => {
+    const arrayBuffer = context.createBuffer(1, state.data.length, 44000)
+    const channel = arrayBuffer.getChannelData(0)
+    forI(state.data, ([_, val], i) => (channel[i] = val * 2 - 0.5))
 
-  forI(state.data, ([_, val], i) => (channel[i] = val * 2 - 0.5))
+    source = context.createBufferSource()
+    source.buffer = arrayBuffer
 
-  const source = context.createBufferSource()
-  source.buffer = arrayBuffer
+    source.connect(context.destination)
+    source.start()
 
-  // Why does this work?
-  source.connect(gainNode).connect(context.destination)
+    source.onended = (e) => {
+      const t = e.timeStamp
+      generateBuffer(t)
+    }
+  }
 
-  source.start()
-  source.loop = true
-
-  buttonEl.addEventListener('mouseup', () => {
-    source.stop()
-  })
+  generateBuffer()
 }
+
+stopEl.addEventListener('mousedown', () => {
+  source?.stop()
+})
 
 main()

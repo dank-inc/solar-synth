@@ -11,17 +11,18 @@ export default createSketch<Values>(
     return () => {
       setFillStyle('#111')
       context.fillRect(0, 0, width, height)
-      // context.beginPath()
-      // context.moveTo(0, height / 2)
+      context.beginPath()
+      context.moveTo(0, height / 2)
 
       setFillStyle('#ccc')
 
       forI(data, ([_, val], i, u) => {
-        context.fillRect(u * width, (val + 0.1) * height - 20, 1, 40)
+        // context.fillRect(u * width, (val + 0.1) * height - 20, 1, 40)
+        context.lineTo(u * width, (val + 0.1) * height - 20)
 
         return null
       })
-      // context.stroke()
+      context.stroke()
     }
   },
 )
