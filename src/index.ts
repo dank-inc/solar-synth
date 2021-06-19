@@ -4,6 +4,8 @@ import vis from './vis'
 import { forI } from '@dank-inc/lewps'
 import { generateSlopes, reMap } from './utils/maff'
 
+import init, { greet } from './wasm/wasm.js'
+
 const buttonEl = document.querySelector('.trigger') as HTMLButtonElement
 const stopEl = document.querySelector('.stahp') as HTMLButtonElement
 
@@ -35,8 +37,14 @@ const state: State = {
   interval: null,
 }
 
+export const lawg = (num: number) => {
+  console.log('LAWG!', num)
+}
+
 const main = async () => {
   const { data } = await axios.get<Data>('https://txt.t0.vc/KCDX.json')
+  // await init()
+  // greet('ELIJAH')
 
   const visEl = document.getElementById('sketchy')
   const rangeEl = document.getElementById('range') as HTMLInputElement
@@ -162,8 +170,7 @@ main()
 const shit = () => {
   const n = [3, 5, 5, 15, 2, 10]
 
-  const nSlopes = generateSlopes(n)
-  const nn = reMap(n, nSlopes, 3)
+  const nn = reMap(n, 3)
 
   console.log(n)
   console.log(nn)
