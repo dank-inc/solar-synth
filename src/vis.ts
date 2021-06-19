@@ -1,8 +1,7 @@
 import { forI } from '@dank-inc/lewps'
 import { createSketch } from '@dank-inc/sketchy'
-import { Values } from '.'
 
-export default createSketch<Values>(
+export default createSketch<number[]>(
   ({ context, setFillStyle, width, height, data }) => {
     setFillStyle('#111')
     context.strokeStyle = '#ccc'
@@ -16,7 +15,7 @@ export default createSketch<Values>(
 
       setFillStyle('#ccc')
 
-      forI(data, ([_, val], i, u) => {
+      forI(data, (val, i, u) => {
         // context.fillRect(u * width, (val + 0.1) * height - 20, 1, 40)
         context.lineTo(u * width, (val + 0.1) * height - 20)
 

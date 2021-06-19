@@ -2,6 +2,7 @@ import axios from 'axios'
 import { createParams, loadSketch } from '@dank-inc/sketchy'
 import vis from './vis'
 import { forI } from '@dank-inc/lewps'
+import { generateSlopes, reMap } from './utils/maff'
 
 const buttonEl = document.querySelector('.trigger') as HTMLButtonElement
 const stopEl = document.querySelector('.stahp') as HTMLButtonElement
@@ -18,10 +19,18 @@ type Data = {
   results: { series: Series[] }[]
 }
 
-const state: { index: number; data: Values; bufferLength: number } = {
+type State = {
+  index: number
+  data: Values
+  bufferLength: number
+  interval: any
+}
+
+const state: State = {
   index: 0,
   data: [],
   bufferLength: 256,
+  interval: null,
 }
 
 const main = async () => {
@@ -58,16 +67,21 @@ const main = async () => {
 
   console.log('length', points.length)
 
-  // setInterval(() => {
-  //   points.forEach((point) => (point[1] = point[1] + r(300, -150)))
-  // }, 1000 / 24)
-
   loadSketch(
     vis,
-    createParams({ element: visEl, data: state.data, animate: true }),
+    createParams({
+      element: visEl,
+      data: state.data.map(([_, v]) => v),
+      animate: true,
+    }),
   )
 
-  console.log('values:', points)
+  const otherD = reMap(
+    state.data.map((point) => point[1]),
+    100,
+  )
+
+  loadSketch(vis, createParams({ element: visEl, data: otherD, animate: true }))
 
   const dataEl = document.querySelector('.data')
   let n = 0
@@ -86,11 +100,11 @@ const main = async () => {
     rowEl.appendChild(tsEl)
     rowEl.appendChild(valEl)
 
-    // dataEl.appendChild(rowEl)
+    dataEl.appendChild(rowEl)
     n++
   }
 
-  buttonEl.addEventListener('mousedown', () => createSynth(points))
+  buttonEl.addEventListener('mousedown', playSynth)
 }
 
 const createCtx = (): AudioContext | null => {
@@ -103,11 +117,12 @@ const createCtx = (): AudioContext | null => {
 }
 
 let source: AudioBufferSourceNode
+let playing = false
 
-const createSynth = async (points: Values) => {
+const playSynth = async () => {
   const context = createCtx()
   if (!context) return
-
+  playing = true
   // const track = new MediaStreamTrack()
   // const stream = new MediaStream([track])
   // context.createMediaStreamSource(stream)
@@ -115,6 +130,7 @@ const createSynth = async (points: Values) => {
   const generateBuffer = (t = 0) => {
     const arrayBuffer = context.createBuffer(1, state.data.length, 44000)
     const channel = arrayBuffer.getChannelData(0)
+
     forI(state.data, ([_, val], i) => (channel[i] = val * 2 - 0.5))
 
     source = context.createBufferSource()
@@ -124,6 +140,7 @@ const createSynth = async (points: Values) => {
     source.start()
 
     source.onended = (e) => {
+      if (!playing) return
       const t = e.timeStamp
       generateBuffer(t)
     }
@@ -133,7 +150,21 @@ const createSynth = async (points: Values) => {
 }
 
 stopEl.addEventListener('mousedown', () => {
+  playing = false
+
   source?.stop()
 })
 
 main()
+
+const shit = () => {
+  const n = [3, 5, 5, 15, 2, 10]
+
+  const nSlopes = generateSlopes(n)
+  const nn = reMap(n, nSlopes, 3)
+
+  console.log(n)
+  console.log(nn)
+}
+
+shit()
