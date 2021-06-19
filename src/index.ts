@@ -2,9 +2,9 @@ import axios from 'axios'
 import { createParams, loadSketch } from '@dank-inc/sketchy'
 import vis from './vis'
 import { forI } from '@dank-inc/lewps'
-import { generateSlopes, reMap } from './utils/maff'
+import { reMap } from './utils/maff'
 
-import init, { greet } from './wasm/wasm.js'
+import initWasm, { greet, remap } from 'audio-crush'
 
 const buttonEl = document.querySelector('.trigger') as HTMLButtonElement
 const stopEl = document.querySelector('.stahp') as HTMLButtonElement
@@ -37,14 +37,17 @@ const state: State = {
   interval: null,
 }
 
-export const lawg = (num: number) => {
+// @ts-ignore
+window.lawg = (num: number) => {
   console.log('LAWG!', num)
 }
 
 const main = async () => {
   const { data } = await axios.get<Data>('https://txt.t0.vc/KCDX.json')
-  // await init()
+  await initWasm()
   // greet('ELIJAH')
+  const shit = remap(new Float32Array([1, 2, 3, 4, 5, 6, 7, 8]), 5)
+  console.log('shit', shit)
 
   const visEl = document.getElementById('sketchy')
   const rangeEl = document.getElementById('range') as HTMLInputElement
@@ -77,8 +80,6 @@ const main = async () => {
     })
   }
 
-  console.log('length', points.length)
-
   loadSketch(
     vis,
     createParams({
@@ -110,7 +111,7 @@ const main = async () => {
     rowEl.appendChild(tsEl)
     rowEl.appendChild(valEl)
 
-    dataEl.appendChild(rowEl)
+    // dataEl.appendChild(rowEl)
     n++
   }
 
@@ -166,14 +167,3 @@ stopEl.addEventListener('mousedown', () => {
 })
 
 main()
-
-const shit = () => {
-  const n = [3, 5, 5, 15, 2, 10]
-
-  const nn = reMap(n, 3)
-
-  console.log(n)
-  console.log(nn)
-}
-
-shit()
