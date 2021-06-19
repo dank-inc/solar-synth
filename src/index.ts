@@ -21,7 +21,8 @@ type Data = {
 
 type State = {
   index: number
-  data: Values
+  data: number[]
+  downSampled: number[]
   bufferLength: number
   interval: any
 }
@@ -29,6 +30,7 @@ type State = {
 const state: State = {
   index: 0,
   data: [],
+  downSampled: [],
   bufferLength: 256,
   interval: null,
 }
@@ -43,7 +45,9 @@ const main = async () => {
 
   state.data = points
     .slice(0, state.bufferLength)
-    .map(([ts, val]) => [ts, val / 7500])
+    .map(([ts, val]) => val / 7500)
+
+  state.downSampled = reMap(state.data, 40)
 
   rangeEl.min = 0 + ''
   rangeEl.max = points.length + ''
@@ -71,17 +75,15 @@ const main = async () => {
     vis,
     createParams({
       element: visEl,
-      data: state.data.map(([_, v]) => v),
+      data: state.data,
       animate: true,
     }),
   )
 
-  const otherD = reMap(
-    state.data.map((point) => point[1]),
-    100,
+  loadSketch(
+    vis,
+    createParams({ element: visEl, data: state.downSampled, animate: true }),
   )
-
-  loadSketch(vis, createParams({ element: visEl, data: otherD, animate: true }))
 
   const dataEl = document.querySelector('.data')
   let n = 0
@@ -131,7 +133,7 @@ const playSynth = async () => {
     const arrayBuffer = context.createBuffer(1, state.data.length, 44000)
     const channel = arrayBuffer.getChannelData(0)
 
-    forI(state.data, ([_, val], i) => (channel[i] = val * 2 - 0.5))
+    forI(state.data, (val, i) => (channel[i] = val * 2 - 0.5))
 
     source = context.createBufferSource()
     source.buffer = arrayBuffer
