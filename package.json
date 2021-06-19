@@ -6,6 +6,7 @@
   "scripts": {
     "start": "parcel src/index.html --public-url /public",
     "build:wasm": "cd audio-crush && wasm-pack build --target web",
+    "build:wasm:watch": "cd audio-crush && cargo watch -w ./src -- wasm-pack build --target web",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

@@ -11,6 +11,8 @@ const stopEl = document.querySelector('.stahp') as HTMLButtonElement
 
 export type Values = [time: number, total: number][]
 
+window = window as typeof globalThis & Window & { lawg: (num: number) => void }
+
 type Series = {
   name: string
   columns: [string, string]

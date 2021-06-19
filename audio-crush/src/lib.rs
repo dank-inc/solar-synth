@@ -11,20 +11,36 @@ pub fn greet(name: &str) {
     alert(&format!("Hello, {}", name))
 }
 
-// private
-fn genSlopes(arr: Vec<f32>) -> Vec<f32> {
-    let _ln = arr.len();
-    let mut slopes = vec![];
-    slopes.push(1.2);
+fn gen_slopes(arr: Vec<f32>) -> Vec<f32> {
+    let mut slopes = Vec::with_capacity(arr.len() * 2);
+    for i in 0..arr.len() {
+        let num = arr[i];
+        if i == 0 {
+            slopes.push(0.0);
+            slopes.push(num);
+
+            continue;
+        }
+        let m = arr[i] - arr[i - 1];
+        let b = arr[i] - m * i as f32;
+
+        slopes.push(m);
+        slopes.push(b);
+    }
+
     return slopes;
 }
 
-pub fn resample(frame: i32, arr: Vec<f32>) {}
+#[wasm_bindgen]
+pub fn resample(arr: Vec<f32>, slopes: Vec<f32>, ln: i32) -> Vec<f32> {
+    // resample
+    return vec![];
+}
 
 #[wasm_bindgen]
 pub fn remap(arr: Vec<f32>, ln: i32) -> Vec<f32> {
-    lawg(ln);
-    let slopes = genSlopes(arr);
+    let slopes = gen_slopes(arr);
+
     return slopes;
 }
 
